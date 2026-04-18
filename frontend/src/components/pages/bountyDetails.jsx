@@ -1,12 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
     ChevronLeft,
-    Home,
-    Repeat2,
-    FolderOpen,
-    User,
     Building2,
     BadgeCheck,
     IndianRupee,
@@ -18,206 +14,71 @@ import {
 } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
 
-// ── Same dummy data as Bounty.jsx ──────────────────────────────────────────────
-const DUMMY_BOUNTIES = [
-    {
-        id: "1",
-        title: "Redesign SaaS landing page",
-        description:
-            "We need a fresh, modern landing page redesign for our analytics SaaS. Hero, features, pricing, and testimonials sections. Figma deliverable with desktop + mobile.",
-        company_name: "Nova Studio",
-        company_verified: true,
-        company_bio: "Growing Indian business hiring based on verified skills and real work.",
-        skills_required: ["Figma", "UI/UX", "Web Design"],
-        budget: 12000,
-        deadline: "2025-05-10",
-        posted: "2025-04-17",
-        category: "ui_ux",
-    },
-    {
-        id: "2",
-        title: "Build analytics dashboard in React",
-        description:
-            "Create an internal analytics dashboard using React + Recharts. Connect to provided JSON API endpoints. Deliver source code with documentation.",
-        company_name: "Urjaa Labs",
-        company_verified: true,
-        company_bio: "Clean energy startup building data-driven solutions for the Indian market.",
-        skills_required: ["React", "Recharts", "Tailwind"],
-        budget: 28000,
-        deadline: "2025-05-20",
-        posted: "2025-04-15",
-        category: "web_dev",
-    },
-    {
-        id: "3",
-        title: "Data cleaning pipeline for CRM exports",
-        description:
-            "Build a Python pipeline to normalize messy CSV exports. Deduplicate leads, validate emails, output clean XLSX. Bonus: add a simple Streamlit UI.",
-        company_name: "AgriMantra",
-        company_verified: true,
-        company_bio: "AgriTech company digitizing the Indian agricultural supply chain.",
-        skills_required: ["Python", "Pandas", "Data"],
-        budget: 18500,
-        deadline: "2025-05-05",
-        posted: "2025-04-10",
-        category: "data",
-    },
-    {
-        id: "4",
-        title: "Mobile app UI in Flutter",
-        description:
-            "Implement 12 screens from our Figma prototype in Flutter. Pixel-perfect, with smooth navigation and animations. Deliver APK + source code.",
-        company_name: "Kodo Tech",
-        company_verified: false,
-        company_bio: "Edtech startup building next-gen learning apps for students.",
-        skills_required: ["Flutter", "Dart", "Figma"],
-        budget: 35000,
-        deadline: "2025-06-01",
-        posted: "2025-04-12",
-        category: "mobile",
-    },
-    {
-        id: "5",
-        title: "SEO content articles — 10 pieces",
-        description:
-            "Write 10 long-form SEO articles (1500+ words) targeting keywords in the fintech and personal finance niche. Deliver in Google Docs with metadata.",
-        company_name: "WealthNow",
-        company_verified: true,
-        company_bio: "Personal finance platform helping Indians save smarter.",
-        skills_required: ["Content Writing", "SEO", "Research"],
-        budget: 9000,
-        deadline: "2025-04-28",
-        posted: "2025-04-08",
-        category: "content",
-    },
-    {
-        id: "6",
-        title: "E-commerce product feed automation",
-        description:
-            "Script to sync WooCommerce product catalog to Google Merchant Center and Meta Catalog automatically daily. Deliver working cron + documentation.",
-        company_name: "Bazaar Digital",
-        company_verified: false,
-        company_bio: "D2C brand consultancy scaling Indian e-commerce businesses.",
-        skills_required: ["Python", "APIs", "Automation"],
-        budget: 22000,
-        deadline: "2025-05-15",
-        posted: "2025-04-14",
-        category: "web_dev",
-    },
-    {
-        id: "7",
-        title: "Instagram growth strategy & content calendar",
-        description:
-            "Build a 90-day Instagram growth plan with content calendar, hashtag research, and posting schedule for a D2C brand in the wellness space.",
-        company_name: "Veda Naturals",
-        company_verified: true,
-        company_bio: "Ayurvedic wellness brand going digital.",
-        skills_required: ["Marketing", "Social Media", "Content"],
-        budget: 7500,
-        deadline: "2025-05-08",
-        posted: "2025-04-09",
-        category: "marketing",
-    },
-    {
-        id: "8",
-        title: "Node.js REST API for inventory management",
-        description:
-            "Build a RESTful API with Node.js/Express and MongoDB for tracking warehouse inventory, orders, and suppliers. Include Postman collection.",
-        company_name: "SwiftStock",
-        company_verified: true,
-        company_bio: "B2B logistics startup modernizing warehouse operations.",
-        skills_required: ["Node.js", "MongoDB", "REST API"],
-        budget: 45000,
-        deadline: "2025-06-15",
-        posted: "2025-04-16",
-        category: "web_dev",
-    },
-    {
-        id: "9",
-        title: "Brand identity & logo design",
-        description:
-            "Full brand identity package: logo (3 concepts), colour palette, typography, and brand usage guidelines PDF. Deliver all source files.",
-        company_name: "Sunrise Exports",
-        company_verified: false,
-        company_bio: "Export-import firm entering the domestic retail market.",
-        skills_required: ["Logo Design", "Branding", "Illustrator"],
-        budget: 14000,
-        deadline: "2025-05-25",
-        posted: "2025-04-13",
-        category: "ui_ux",
-    },
-];
-
-// ── Sidebar ────────────────────────────────────────────────────────────────────
-function Sidebar() {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const initial = (user.name || "U")[0].toUpperCase();
-
-    return (
-        <nav className="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 border-r border-white/5 bg-neutral-900/40 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] z-40">
-            <div className="p-8">
-                <div className="text-2xl font-extrabold tracking-tighter bg-gradient-to-r from-[#ba9eff] to-[#699cff] bg-clip-text text-transparent">
-                    Step-A-Ahead
-                </div>
-                <div className="text-xs text-white/30 tracking-wider uppercase mt-1 font-semibold">
-                    Future of Work
-                </div>
-            </div>
-            <div className="flex-1 px-4 space-y-2 mt-4">
-                <Link to="/" className="flex items-center gap-4 px-4 py-3 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-all group">
-                    <Home className="h-4 w-4" />
-                    <span className="font-medium text-sm">Home</span>
-                </Link>
-                <Link to="/bounties" className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#ba9eff] border-r-2 border-[#ba9eff] font-bold bg-white/5 transition-all">
-                    <Repeat2 className="h-4 w-4" />
-                    <span className="font-medium text-sm">Bounties</span>
-                </Link>
-                <Link to="/bounties" className="flex items-center gap-4 px-4 py-3 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-all group">
-                    <FolderOpen className="h-4 w-4" />
-                    <span className="font-medium text-sm">Projects</span>
-                </Link>
-                <Link to="/dashboard" className="flex items-center gap-4 px-4 py-3 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-all group">
-                    <User className="h-4 w-4" />
-                    <span className="font-medium text-sm">Profile</span>
-                </Link>
-            </div>
-
-            {/* Nudge card */}
-            <div className="mx-4 mb-4 p-4 rounded-xl bg-gradient-to-br from-purple-600/20 to-pink-600/10 border border-purple-500/20">
-                <p className="text-xs font-bold text-white mb-1">Level up faster</p>
-                <p className="text-[11px] text-white/40 leading-relaxed">
-                    Complete a bounty this week to boost your profile score.
-                </p>
-            </div>
-
-            <div className="p-6 border-t border-white/5">
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        {initial}
-                    </div>
-                    <div className="min-w-0">
-                        <div className="text-sm font-semibold text-white truncate">{user.name || "Guest"}</div>
-                        <div className="text-xs text-white/30 truncate">{user.email || ""}</div>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    );
-}
-
 // ── Main Page ──────────────────────────────────────────────────────────────────
 export default function BountyDetail() {
     const { id } = useParams();
+    const [bounty, setBounty] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [fetchError, setFetchError] = useState("");
     const [activeTab, setActiveTab] = useState("submit");
     const [workLink, setWorkLink] = useState("");
     const [notes, setNotes] = useState("");
     const [submitted, setSubmitted] = useState(false);
 
-    const bounty = DUMMY_BOUNTIES.find((b) => b.id === id) || DUMMY_BOUNTIES[0];
+    useEffect(() => {
+        if (!id) { setFetchError("No bounty ID provided."); setLoading(false); return; }
+        fetch(`http://localhost:5000/api/bounties/${id}`)
+            .then((r) => {
+                if (!r.ok) throw new Error("Bounty not found");
+                return r.json();
+            })
+            .then((data) => {
+                const b = data.bounty;
+                // Normalise backend schema → component shape
+                setBounty({
+                    id: b._id,
+                    title: b.title,
+                    description: b.description,
+                    company_name: b.msmeBusinessName || "MSME",
+                    company_verified: b.msmeVerified || false,
+                    company_bio: "",
+                    skills_required: b.skill ? [b.skill] : [],
+                    budget: b.budget,
+                    deadline: b.deadline ? b.deadline.slice(0, 10) : null,
+                    posted: b.createdAt ? b.createdAt.slice(0, 10) : null,
+                });
+            })
+            .catch((err) => setFetchError(err.message))
+            .finally(() => setLoading(false));
+    }, [id]);
+
+    // ── Loading ──
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
+    }
+
+    // ── Error ──
+    if (fetchError || !bounty) {
+        return (
+            <div className="min-h-screen bg-[#0e0e0e] flex items-center justify-center text-white">
+                <div className="text-center">
+                    <p className="text-lg font-semibold text-white/60 mb-3">{fetchError || "Bounty not found"}</p>
+                    <Link to="/bounties" className="text-sm text-purple-400 hover:text-purple-300 underline underline-offset-2">
+                        ← Back to marketplace
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+
     const deadline = bounty.deadline ? new Date(bounty.deadline) : null;
     const posted = bounty.posted ? new Date(bounty.posted) : null;
     const daysLeft = deadline ? differenceInDays(deadline, new Date()) : null;
-    const companyInitial = bounty.company_name[0].toUpperCase();
+    const companyInitial = (bounty.company_name || "M")[0].toUpperCase();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -234,9 +95,7 @@ export default function BountyDetail() {
         <div className="min-h-screen bg-[#0e0e0e] text-white font-sans">
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-            <Sidebar />
-
-            <main className="md:pl-64 min-h-screen">
+            <main className="min-h-screen">
                 <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
                     {/* Back link */}
@@ -514,21 +373,6 @@ export default function BountyDetail() {
                 </div>
             </main>
 
-            {/* Mobile bottom nav */}
-            <nav className="md:hidden fixed bottom-0 w-full h-16 bg-[#0e0e0e]/90 backdrop-blur-xl border-t border-white/5 flex justify-around items-center z-50 px-2">
-                <Link to="/" className="flex flex-col items-center w-16 text-white/40 hover:text-white transition-colors">
-                    <Home className="h-5 w-5 mb-1" />
-                    <span className="text-[10px]">Home</span>
-                </Link>
-                <Link to="/bounties" className="flex flex-col items-center w-16 text-purple-400">
-                    <Repeat2 className="h-5 w-5 mb-1" />
-                    <span className="text-[10px] font-bold">Bounties</span>
-                </Link>
-                <Link to="/dashboard" className="flex flex-col items-center w-16 text-white/40 hover:text-white transition-colors">
-                    <User className="h-5 w-5 mb-1" />
-                    <span className="text-[10px]">Profile</span>
-                </Link>
-            </nav>
         </div>
     );
 }
