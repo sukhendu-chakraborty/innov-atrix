@@ -20,7 +20,8 @@ export default function TaskDetail() {
     const [task, setTask] = useState(null);
     const [loading, setLoading] = useState(true);
     const [fetchError, setFetchError] = useState("");
-    const [activeTab, setActiveTab] = useState("details");
+    const isMSME = !!localStorage.getItem("msme_accessToken");
+    const [activeTab, setActiveTab] = useState(isMSME ? "smart-matches" : "details");
     const [workLink, setWorkLink] = useState("");
     const [notes, setNotes] = useState("");
     const [applied, setApplied] = useState(false);
@@ -29,6 +30,11 @@ export default function TaskDetail() {
     const [submitError, setSubmitError] = useState("");
     const [submissionCount, setSubmissionCount] = useState(0);
     const [mySubmission, setMySubmission] = useState(null);
+
+    // AI Smart Match State
+    const [aiMatches, setAiMatches] = useState([]);
+    const [loadingAi, setLoadingAi] = useState(false);
+    const [aiError, setAiError] = useState("");
 
     // Fetch submission is not needed since tasks do not natively support submissions right now
     const fetchSubmissions = async (taskId) => {
@@ -63,6 +69,23 @@ export default function TaskDetail() {
 
         fetchSubmissions(id);
     }, [id]);
+
+    useEffect(() => {
+        if (isMSME && activeTab === "smart-matches" && aiMatches.length === 0) {
+            setLoadingAi(true);
+            fetch(`http://localhost:5000/api/ai/match/${id}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.matches) {
+                        setAiMatches(data.matches);
+                    } else if (data.message) {
+                        setAiError(data.message);
+                    }
+                })
+                .catch(err => setAiError("Failed to fetch AI matches"))
+                .finally(() => setLoadingAi(false));
+        }
+    }, [isMSME, activeTab, id]);
 
     // ── Loading ──
     if (loading) {
@@ -123,7 +146,11 @@ export default function TaskDetail() {
         }
     };
 
-    const tabs = [
+    const tabs = isMSME ? [
+        { id: "smart-matches", label: "Smart Matches ✨" },
+        { id: "details", label: "Details" },
+        { id: "discussion", label: "Discussion" },
+    ] : [
         { id: "details", label: "Details" },
         { id: "discussion", label: "Discussion" },
     ];
@@ -248,6 +275,71 @@ export default function TaskDetail() {
 
                                 {/* Tab content */}
                                 <div className="p-6">
+                                    {activeTab === "smart-matches" && (
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-3 mb-6 p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                                                <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                                    <span className="text-xl">✨</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-purple-300">Neural Smart Match</p>
+                                                    <p className="text-xs text-purple-400/80 mt-0.5">AI has analyzed this task and found the best student fits from our platform.</p>
+                                                </div>
+                                            </div>
+
+                                            {loadingAi ? (
+                                                <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                                                    <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                                                    <p className="text-sm text-white/50">Analyzing candidates...</p>
+                                                </div>
+                                            ) : aiError ? (
+                                                <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-center">
+                                                    <p className="text-sm text-red-400">{aiError}</p>
+                                                </div>
+                                            ) : aiMatches.length === 0 ? (
+                                                <div className="text-center py-10">
+                                                    <p className="text-sm text-white/50">No matches found.</p>
+                                                </div>
+                                            ) : (
+                                                <div className="grid gap-4">
+                                                    {aiMatches.map((match, idx) => (
+                                                        <div key={idx} className="p-5 rounded-2xl bg-white/[0.04] border border-white/10 flex flex-col md:flex-row gap-5 items-start md:items-center hover:bg-white/[0.06] transition-colors relative overflow-hidden">
+                                                            {idx === 0 && (
+                                                                <div className="absolute top-0 right-0 px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-400 text-[10px] font-bold text-white uppercase tracking-wider rounded-bl-lg shadow-lg">
+                                                                    Top Pick
+                                                                </div>
+                                                            )}
+                                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                                                {match.student_name[0]?.toUpperCase() || "S"}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <h3 className="text-base font-semibold text-white truncate">{match.student_name}</h3>
+                                                                <p className="text-xs text-white/50 mt-1 line-clamp-1">{match.student_skills}</p>
+                                                            </div>
+                                                            <div className="flex items-center gap-6">
+                                                                <div className="text-center">
+                                                                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1.5">AI Similarity</p>
+                                                                    <div className="inline-flex px-2 py-1 rounded bg-white/5 border border-white/10 text-xs font-semibold text-white/80">
+                                                                        {match.ai_similarity?.toFixed(1) || "0.0"}%
+                                                                    </div>
+                                                                </div>
+                                                                <div className="text-center">
+                                                                    <p className="text-[10px] text-white/40 uppercase font-bold tracking-widest mb-1.5">Trust Score</p>
+                                                                    <div className="inline-flex px-2.5 py-1 rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 text-sm font-bold text-purple-300">
+                                                                        {match.trust_score?.toFixed(1) || "0.0"}
+                                                                    </div>
+                                                                </div>
+                                                                <button className="h-9 px-4 bg-white/10 hover:bg-white/15 text-white text-xs font-semibold rounded-lg transition-colors whitespace-nowrap">
+                                                                    View Profile
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
                                     {activeTab === "details" && (
                                         <div className="flex flex-col items-center justify-center py-10 text-center">
                                             <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4">
@@ -257,17 +349,24 @@ export default function TaskDetail() {
                                             <p className="text-sm text-white/40 mb-6 max-w-sm">
                                                 For tasks, you work closely with the MSME. Click apply below to express your interest, and be sure to start a discussion in the discussion tab to demonstrate your skills.
                                             </p>
-                                            <button
-                                                onClick={() => setApplied(true)}
-                                                disabled={applied}
-                                                className={`px-8 py-2.5 text-sm font-semibold rounded-full shadow-lg transition-all duration-300 ${
-                                                    applied
-                                                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-not-allowed"
-                                                        : "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90 hover:scale-105"
-                                                }`}
-                                            >
-                                                {applied ? "Application Sent ✓" : "Apply to Task"}
-                                            </button>
+                                            {!isMSME && (
+                                                <button
+                                                    onClick={() => setApplied(true)}
+                                                    disabled={applied}
+                                                    className={`px-8 py-2.5 text-sm font-semibold rounded-full shadow-lg transition-all duration-300 ${
+                                                        applied
+                                                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-not-allowed"
+                                                            : "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90 hover:scale-105"
+                                                    }`}
+                                                >
+                                                    {applied ? "Application Sent ✓" : "Apply to Task"}
+                                                </button>
+                                            )}
+                                            {isMSME && (
+                                                <p className="text-sm text-emerald-400 font-semibold p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/10">
+                                                    You are viewing your own task.
+                                                </p>
+                                            )}
                                         </div>
                                     )}
 

@@ -8,6 +8,7 @@ import msmeRouter from "./routes/msme.route.js";
 import bountyRouter from "./routes/bounty.route.js";
 import submissionRouter from "./routes/submission.route.js";
 import taskRouter from "./routes/task.route.js";
+import aiRouter from "./routes/ai.route.js";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use("/api/msme",     msmeRouter);
 app.use("/api/bounties", bountyRouter);
 app.use("/api/submissions", submissionRouter);
 app.use("/api/tasks", taskRouter);
+app.use("/api/ai", aiRouter);
 
 const PORT = process.env.PORT || 5001;
 await connectDB();
