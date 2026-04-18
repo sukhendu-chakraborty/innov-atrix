@@ -70,19 +70,41 @@ export default function MsmeDashboard() {
 
     useEffect(() => {
         const token = localStorage.getItem("msme_accessToken");
-        fetch("http://localhost:5000/api/bounties/my", {
-            headers: { Authorization: `Bearer ${token}` },
-            credentials: "include",
-        })
-            .then((r) => r.json())
-            .then((data) => {
-                // Normalize _id → id and skill → skills array
-                const list = (data.bounties || []).map((b) => ({
-                    ...b,
-                    id: b._id,
-                    skills: b.skill ? [b.skill] : [],
-                }));
-                setBounties(list);
+        
+        Promise.all([
+            fetch("http://localhost:5000/api/bounties/my", {
+                headers: { Authorization: `Bearer ${token}` },
+                credentials: "include",
+            }).then((r) => r.json()),
+            fetch("http://localhost:5000/api/tasks/my", {
+                headers: { Authorization: `Bearer ${token}` },
+                credentials: "include",
+            }).then((r) => r.json())
+        ])
+            .then(([bountiesData, tasksData]) => {
+                const bountiesList = (bountiesData.bounties || []).map((b) => {
+                    const obj = { ...b };
+                    obj.id = b._id;
+                    obj.skills = b.skill ? [b.skill] : [];
+                    obj.itemType = "bounty";
+                    return obj;
+                });
+                const tasksList = (tasksData.tasks || []).map((t) => {
+                    const obj = { ...t };
+                    obj.id = t._id;
+                    obj.skills = t.skill ? [t.skill] : [];
+                    obj.itemType = "task";
+                    return obj;
+                });
+                
+                // Combine and sort by createdAt descending
+                const combined = [...bountiesList, ...tasksList].sort((a, b) => {
+                    const dateA = new Date(a.createdAt || a.deadline || 0);
+                    const dateB = new Date(b.createdAt || b.deadline || 0);
+                    return dateB - dateA;
+                });
+                
+                setBounties(combined);
             })
             .catch(() => {})
             .finally(() => setLoading(false));
@@ -96,7 +118,7 @@ export default function MsmeDashboard() {
 
     const stats = [
         {
-            label: "Active bounties",
+            label: "Active postings",
             value: bounties.filter((b) => b.status === "open").length,
             icon: Briefcase,
             accent: "purple",
@@ -162,7 +184,7 @@ export default function MsmeDashboard() {
             <div className="rounded-2xl bg-white/[0.03] border border-white/5 overflow-hidden">
                 {/* Table header row */}
                 <div className="px-5 py-4 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <h2 className="font-semibold text-white text-sm">Your bounties</h2>
+                    <h2 className="font-semibold text-white text-sm">Your bounties & tasks</h2>
 
                     <div className="flex items-center gap-2 flex-wrap">
                         {/* Search */}
@@ -246,9 +268,18 @@ export default function MsmeDashboard() {
                                 >
                                     {/* Left: title + skills */}
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-white text-sm truncate">
-                                            {b.title}
-                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                                                b.itemType === 'bounty' 
+                                                ? 'bg-purple-500/20 text-purple-400 border border-purple-500/20' 
+                                                : 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                                            }`}>
+                                                {b.itemType === 'bounty' ? 'Bounty' : 'Task'}
+                                            </span>
+                                            <p className="font-semibold text-white text-sm truncate">
+                                                {b.title}
+                                            </p>
+                                        </div>
                                         <div className="flex flex-wrap gap-1.5 mt-2">
                                             {b.skills.slice(0, 4).map((s) => (
                                                 <SkillTag key={s}>{s}</SkillTag>
@@ -283,7 +314,7 @@ export default function MsmeDashboard() {
 
                                         {/* View button */}
                                         <Link
-                                            to={`/bounty-detail/${b.id}`}
+                                            to={b.itemType === 'bounty' ? `/bounty-detail/${b.id}` : `/task-detail/${b.id}`}
                                             className="p-1.5 rounded-full text-white/30 hover:text-white hover:bg-white/10 transition-all"
                                         >
                                             <Eye className="h-4 w-4" />
