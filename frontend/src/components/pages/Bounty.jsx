@@ -355,7 +355,8 @@ export default function BountyMarketplace() {
 
             <Sidebar />
 
-            <main className="md:pl-64 px-4 sm:px-6 lg:px-8 py-10 max-w-[1400px] mx-auto">
+            <main className="md:pl-64 min-h-screen">
+                <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
                 {/* ── Header ── */}
                 <div className="mb-8">
                     <p className="text-xs text-white/30 uppercase tracking-widest font-semibold mb-1">Marketplace</p>
@@ -438,6 +439,7 @@ export default function BountyMarketplace() {
                         ))}
                     </div>
                 )}
+                </div>
             </main>
 
             {/* Mobile bottom nav */}
