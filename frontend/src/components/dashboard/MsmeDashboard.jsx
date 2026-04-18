@@ -133,13 +133,22 @@ export default function MsmeDashboard() {
                         <span className="text-white/60 font-medium">{msme.businessName}</span>
                     </p>
                 </div>
-                <Link
-                    to="/msme/post-bounty"
-                    className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-lg shadow-purple-900/30 w-fit"
-                >
-                    <Plus className="h-4 w-4" />
-                    Post a bounty
-                </Link>
+                <div className="flex gap-3">
+                    <Link
+                        to="/msme/post-task"
+                        className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-lg shadow-blue-900/30 w-fit"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Post a task
+                    </Link>
+                    <Link
+                        to="/msme/post-bounty"
+                        className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-lg shadow-purple-900/30 w-fit"
+                    >
+                        <Plus className="h-4 w-4" />
+                        Post a bounty
+                    </Link>
+                </div>
             </div>
 
             {/* ── Stats ── */}
@@ -198,21 +207,30 @@ export default function MsmeDashboard() {
                     <div className="p-8">
                         <EmptyState
                             icon={Briefcase}
-                            title="No bounties found"
+                            title="No records found"
                             description={
                                 bounties.length === 0
-                                    ? "Post your first bounty and start hiring in days, not months."
-                                    : "No bounties match your current filter."
+                                    ? "Post your first bounty or task and start hiring in days, not months."
+                                    : "No records match your current filter."
                             }
                             action={
                                 bounties.length === 0 ? (
-                                    <Link
-                                        to="/msme/post-bounty"
-                                        className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold px-5 py-2.5 rounded-full"
-                                    >
-                                        <Plus className="h-4 w-4" />
-                                        Post a Bounty
-                                    </Link>
+                                    <div className="flex gap-3">
+                                        <Link
+                                            to="/msme/post-task"
+                                            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold px-5 py-2.5 rounded-full"
+                                        >
+                                            <Plus className="h-4 w-4" />
+                                            Post a Task
+                                        </Link>
+                                        <Link
+                                            to="/msme/post-bounty"
+                                            className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold px-5 py-2.5 rounded-full"
+                                        >
+                                            <Plus className="h-4 w-4" />
+                                            Post a Bounty
+                                        </Link>
+                                    </div>
                                 ) : null
                             }
                         />

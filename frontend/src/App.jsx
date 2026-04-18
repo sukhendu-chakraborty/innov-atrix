@@ -10,6 +10,7 @@ import BountyDetail from "./components/pages/bountyDetails"
 import MsmeLogin from "./components/auth/MsmeLogin"
 import MsmeRegister from "./components/auth/MsmeRegister"
 import MsmeDashboard from "./components/dashboard/MsmeDashboard"
+import PostTask from "./components/pages/PostTask"
 import PostBounty from "./components/pages/PostBounty"
 import MsmeSubmissions from "./components/dashboard/MsmeSubmissions"
 import ViewSubmission from "./components/pages/ViewSubmission"
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/msme/dashboard"  element={<MsmeDashboard />} />
         <Route path="/msme/submissions" element={<MsmeSubmissions />} />
         <Route path="/msme/submissions/:id" element={<ViewSubmission />} />
+        <Route path="/msme/post-task" element={<PostTask />} />
         <Route path="/msme/post-bounty" element={<PostBounty />} />
       </Routes>
     </div>

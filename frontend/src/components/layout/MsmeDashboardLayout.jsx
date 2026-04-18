@@ -14,6 +14,7 @@ import {
 const navItems = [
     { name: "Dashboard",      icon: LayoutDashboard, path: "/msme/dashboard" },
     { name: "Post a Bounty",  icon: Plus,            path: "/msme/post-bounty" },
+    { name: "Post a Task",    icon: Plus,            path: "/msme/post-task" },
     { name: "Submissions",    icon: ListChecks,      path: "/msme/submissions" },
 ];
 
