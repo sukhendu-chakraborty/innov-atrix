@@ -107,13 +107,13 @@ const Dashboard = () => {
     }
 
     // ── Derived data ──
-    const trustScore = 89; // placeholder until trust-score API exists
+    const profileScore = 89; // placeholder until trust-score API exists
     const rating = 4.7;
     const pieData = [
-        { value: trustScore },
-        { value: 100 - trustScore },
+        { value: profileScore },
+        { value: 100 - profileScore },
     ];
-    const scoreColor = trustScore > 80 ? "#22c55e" : trustScore > 50 ? "#f59e0b" : "#ef4444";
+    const scoreColor = profileScore > 80 ? "#22c55e" : profileScore > 50 ? "#f59e0b" : "#ef4444";
 
     // Parse skills string → array (comma or newline separated)
     const skillsList = user.skills
@@ -284,7 +284,7 @@ const Dashboard = () => {
                                         animate={{ scale: 1, opacity: 1 }}
                                         className="bg-surface-container-highest p-4 rounded-xl border border-outline-variant/10 flex flex-col items-center"
                                     >
-                                        <div className="text-xs uppercase text-white mb-1">Trust Score</div>
+                                        <div className="text-xs uppercase text-white mb-1">Profile Score</div>
                                         <div className="relative">
                                             <PieChart width={90} height={90}>
                                                 <Pie data={pieData} innerRadius={27} outerRadius={40} startAngle={90} endAngle={-270} dataKey="value">
@@ -293,7 +293,7 @@ const Dashboard = () => {
                                                 </Pie>
                                             </PieChart>
                                             <div className="absolute inset-0 flex items-center justify-center font-bold text-white text-sm">
-                                                {trustScore}%
+                                                {profileScore}%
                                             </div>
                                         </div>
                                     </motion.div>
