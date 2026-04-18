@@ -23,6 +23,7 @@ export default function TaskDetail() {
     const [activeTab, setActiveTab] = useState("details");
     const [workLink, setWorkLink] = useState("");
     const [notes, setNotes] = useState("");
+    const [applied, setApplied] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
@@ -253,9 +254,20 @@ export default function TaskDetail() {
                                                 <BadgeCheck className="w-7 h-7 text-purple-400" />
                                             </div>
                                             <h3 className="text-base font-semibold text-white mb-1">How to Apply</h3>
-                                            <p className="text-sm text-white/40 mb-5 max-w-sm">
-                                                For tasks, you work closely with the MSME. Please contact them directly via their profile or start a discussion in the discussion tab to express your interest and demonstrate your skills.
+                                            <p className="text-sm text-white/40 mb-6 max-w-sm">
+                                                For tasks, you work closely with the MSME. Click apply below to express your interest, and be sure to start a discussion in the discussion tab to demonstrate your skills.
                                             </p>
+                                            <button
+                                                onClick={() => setApplied(true)}
+                                                disabled={applied}
+                                                className={`px-8 py-2.5 text-sm font-semibold rounded-full shadow-lg transition-all duration-300 ${
+                                                    applied
+                                                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-not-allowed"
+                                                        : "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90 hover:scale-105"
+                                                }`}
+                                            >
+                                                {applied ? "Application Sent ✓" : "Apply to Task"}
+                                            </button>
                                         </div>
                                     )}
 
