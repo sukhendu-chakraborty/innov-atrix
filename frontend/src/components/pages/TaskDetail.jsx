@@ -24,6 +24,8 @@ export default function TaskDetail() {
     const [workLink, setWorkLink] = useState("");
     const [notes, setNotes] = useState("");
     const [applied, setApplied] = useState(false);
+    const [submittingApply, setSubmittingApply] = useState(false);
+    const [applyError, setApplyError] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState("");
@@ -120,6 +122,32 @@ export default function TaskDetail() {
             setSubmitError(err.message);
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleApply = async () => {
+        setSubmittingApply(true);
+        setApplyError("");
+        try {
+            const token = localStorage.getItem("accessToken");
+            if (!token) throw new Error("Please log in first.");
+
+            const res = await fetch(`http://localhost:5000/api/applications/${id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ notes: "I am interested in this task." })
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || "Failed to apply");
+            setApplied(true);
+        } catch (err) {
+            setApplyError(err.message);
+        } finally {
+            setSubmittingApply(false);
         }
     };
 
@@ -254,19 +282,24 @@ export default function TaskDetail() {
                                                 <BadgeCheck className="w-7 h-7 text-purple-400" />
                                             </div>
                                             <h3 className="text-base font-semibold text-white mb-1">How to Apply</h3>
-                                            <p className="text-sm text-white/40 mb-6 max-w-sm">
+                                            <p className="text-sm text-white/40 mb-3 max-w-sm">
                                                 For tasks, you work closely with the MSME. Click apply below to express your interest, and be sure to start a discussion in the discussion tab to demonstrate your skills.
                                             </p>
+                                            
+                                            {applyError && (
+                                                <p className="text-rose-400 text-xs font-semibold mb-3">{applyError}</p>
+                                            )}
+
                                             <button
-                                                onClick={() => setApplied(true)}
-                                                disabled={applied}
+                                                onClick={handleApply}
+                                                disabled={applied || submittingApply}
                                                 className={`px-8 py-2.5 text-sm font-semibold rounded-full shadow-lg transition-all duration-300 ${
                                                     applied
                                                         ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-not-allowed"
-                                                        : "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90 hover:scale-105"
+                                                        : "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90 hover:scale-105 disabled:opacity-50"
                                                 }`}
                                             >
-                                                {applied ? "Application Sent ✓" : "Apply to Task"}
+                                                {submittingApply ? "Sending..." : applied ? "Application Sent ✓" : "Apply to Task"}
                                             </button>
                                         </div>
                                     )}

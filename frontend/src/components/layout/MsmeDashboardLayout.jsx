@@ -16,6 +16,7 @@ const navItems = [
     { name: "Post a Bounty",  icon: Plus,            path: "/msme/post-bounty" },
     { name: "Post a Task",    icon: Plus,            path: "/msme/post-task" },
     { name: "Submissions",    icon: ListChecks,      path: "/msme/submissions" },
+    { name: "Applications",   icon: ListChecks,      path: "/msme/applications" },
 ];
 
 export default function MsmeDashboardLayout({ children }) {
