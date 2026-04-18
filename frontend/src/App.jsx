@@ -7,6 +7,11 @@ import Login from "./components/auth/Login"
 import Dashboard from "./components/dashboard/Dashboard"
 import Bounties from "./components/pages/Bounty"
 import BountyDetail from "./components/pages/bountyDetails"
+import BentoGrid from "./components/landing-page/BentoGrid"
+// import ScrollText from "./components/landing-page/Scroll-text"
+import Timeline from "./components/landing-page/Timeline"
+import { PricingSection } from "./components/landing-page/Pricing"
+
 
 function LandingPage() {
   const navigate = useNavigate()
@@ -17,6 +22,10 @@ function LandingPage() {
         onOpenLogin={() => navigate("/login")}
       />
       <Hero />
+      <BentoGrid />
+      <Timeline />
+      <PricingSection />
+      {/* <ScrollText /> */}
       <Footer />
     </>
   )
@@ -40,4 +49,4 @@ export default function App() {
       </Routes>
     </div>
   )
-}
+}
