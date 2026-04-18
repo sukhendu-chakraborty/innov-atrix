@@ -107,7 +107,12 @@ const Dashboard = () => {
     }
 
     // ── Derived data ──
-    const profileScore = 89; // placeholder until trust-score API exists
+    const profileScore = user.profileScore ?? 0;
+    const breakdown = user.profileScoreBreakdown || {
+        skills:          { score: 0, max: 35 },
+        description:     { score: 0, max: 30 },
+        pastExperiences: { score: 0, max: 35 },
+    };
     const rating = 4.7;
     const pieData = [
         { value: profileScore },
@@ -278,11 +283,12 @@ const Dashboard = () => {
                                         <div className="text-xs text-on-surface-variant uppercase tracking-wider mb-1">Task Earnings</div>
                                         <div className="text-2xl font-bold text-on-surface">₹0</div>
                                     </div>
-                                    {/* Trust Score donut */}
+                                    {/* Profile Score donut */}
                                     <motion.div
                                         initial={{ scale: 0.8, opacity: 0 }}
                                         animate={{ scale: 1, opacity: 1 }}
-                                        className="bg-surface-container-highest p-4 rounded-xl border border-outline-variant/10 flex flex-col items-center"
+                                        className="bg-surface-container-highest p-4 rounded-xl border border-outline-variant/10 flex flex-col items-center group relative"
+                                        title={`Skills: ${breakdown.skills?.score}/${breakdown.skills?.max} · About: ${breakdown.description?.score}/${breakdown.description?.max} · Experience: ${breakdown.pastExperiences?.score}/${breakdown.pastExperiences?.max}`}
                                     >
                                         <div className="text-xs uppercase text-white mb-1">Profile Score</div>
                                         <div className="relative">
@@ -294,6 +300,24 @@ const Dashboard = () => {
                                             </PieChart>
                                             <div className="absolute inset-0 flex items-center justify-center font-bold text-white text-sm">
                                                 {profileScore}%
+                                            </div>
+                                        </div>
+                                        {/* Score breakdown tooltip */}
+                                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#1a1919] border border-white/10 rounded-xl p-3 text-xs text-white/70 w-44 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
+                                            <p className="font-semibold text-white mb-2">Score Breakdown</p>
+                                            <div className="space-y-1.5">
+                                                <div className="flex justify-between">
+                                                    <span>Skills</span>
+                                                    <span className="text-white font-medium">{breakdown.skills?.score ?? 0}<span className="text-white/30">/{breakdown.skills?.max ?? 35}</span></span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>About You</span>
+                                                    <span className="text-white font-medium">{breakdown.description?.score ?? 0}<span className="text-white/30">/{breakdown.description?.max ?? 30}</span></span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>Experience</span>
+                                                    <span className="text-white font-medium">{breakdown.pastExperiences?.score ?? 0}<span className="text-white/30">/{breakdown.pastExperiences?.max ?? 35}</span></span>
+                                                </div>
                                             </div>
                                         </div>
                                     </motion.div>
