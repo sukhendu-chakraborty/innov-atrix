@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
     
     // Form 2 fields
     description: { type: String, default: "" },
+    skills: { type: String, default: "" },
     githubUrl: { type: String, default: "" },
     linkedinUrl: { type: String, default: "" },
     pastExperiences: { type: String, default: "" },
@@ -20,10 +21,9 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Hash password before saving
-userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
+userSchema.pre("save", async function () {
+    if (!this.isModified("password")) return;
     this.password = await bcrypt.hash(this.password, 10);
-    next();
 });
 
 // Compare hashed passwords

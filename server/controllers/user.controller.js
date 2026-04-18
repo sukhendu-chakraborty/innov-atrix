@@ -19,8 +19,10 @@ export const registerUser = async (req, res) => {
     try {
         const { 
             name, email, phone, password, 
-            description, githubUrl, linkedinUrl, pastExperiences, portfolioLink 
+            description, skills, githubUrl, linkedinUrl, pastExperiences, portfolioLink 
         } = req.body;
+
+        console.log("REACHED BACKEND SIGNUP. req.body:", req.body);
 
         // Validation for Form 1 required fields
         if (!name || !email || !phone || !password) {
@@ -36,7 +38,7 @@ export const registerUser = async (req, res) => {
         // Create user with both forms' data
         const user = await User.create({
             name, email, phone, password,
-            description, githubUrl, linkedinUrl, pastExperiences, portfolioLink
+            description, skills, githubUrl, linkedinUrl, pastExperiences, portfolioLink
         });
 
         // Remove sensitive info for response
