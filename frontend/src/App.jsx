@@ -10,6 +10,7 @@ import BountyDetail from "./components/pages/bountyDetails"
 import MsmeLogin from "./components/auth/MsmeLogin"
 import MsmeRegister from "./components/auth/MsmeRegister"
 import MsmeDashboard from "./components/dashboard/MsmeDashboard"
+import PostBounty from "./components/pages/PostBounty"
 
 function LandingPage() {
   const navigate = useNavigate()
@@ -40,9 +41,10 @@ export default function App() {
         <Route path="/bounties" element={<Bounties />} />
         <Route path="/bounty-detail" element={<BountyDetail />} />
         <Route path="/bounty-detail/:id" element={<BountyDetail />} />
-        <Route path="/msme/login" element={<MsmeLogin />} />
-        <Route path="/msme/register" element={<MsmeRegister />} />
-        <Route path="/msme/dashboard" element={<MsmeDashboard />} />
+        <Route path="/msme/login"      element={<MsmeLogin />} />
+        <Route path="/msme/register"   element={<MsmeRegister />} />
+        <Route path="/msme/dashboard"  element={<MsmeDashboard />} />
+        <Route path="/msme/post-bounty" element={<PostBounty />} />
       </Routes>
     </div>
   )

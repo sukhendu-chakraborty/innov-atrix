@@ -12,9 +12,9 @@ import {
 } from "lucide-react";
 
 const navItems = [
-    { name: "Dashboard", icon: LayoutDashboard, path: "/msme/dashboard" },
-    { name: "Post a Task", icon: Plus, path: "/msme/post-task" },
-    { name: "Submissions", icon: ListChecks, path: "/msme/submissions" },
+    { name: "Dashboard",      icon: LayoutDashboard, path: "/msme/dashboard" },
+    { name: "Post a Bounty",  icon: Plus,            path: "/msme/post-bounty" },
+    { name: "Submissions",    icon: ListChecks,      path: "/msme/submissions" },
 ];
 
 export default function MsmeDashboardLayout({ children }) {

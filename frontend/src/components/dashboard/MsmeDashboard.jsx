@@ -17,42 +17,6 @@ import MsmeDashboardLayout from "../layout/MsmeDashboardLayout";
 import SkillTag from "../ui-custom/SkillTag";
 import EmptyState from "../ui-custom/EmptyState";
 
-// ── Mock bounty data (replace with real API call once backend ready) ──────────
-const MOCK_BOUNTIES = [
-    {
-        id: "1",
-        title: "Redesign SaaS landing page",
-        skills: ["Figma", "UI/UX", "Web Design"],
-        budget: 12000,
-        deadline: "2025-05-10",
-        status: "open",
-    },
-    {
-        id: "2",
-        title: "Build analytics dashboard in React",
-        skills: ["React", "Recharts", "Tailwind"],
-        budget: 28000,
-        deadline: "2025-05-20",
-        status: "open",
-    },
-    {
-        id: "3",
-        title: "Data cleaning pipeline for CRM exports",
-        skills: ["Python", "Pandas", "SQL"],
-        budget: 18000,
-        deadline: "2025-05-15",
-        status: "in_review",
-    },
-    {
-        id: "4",
-        title: "Mobile app UI in Flutter",
-        skills: ["Flutter", "Dart", "Figma"],
-        budget: 35000,
-        deadline: "2025-06-01",
-        status: "closed",
-    },
-];
-
 // ── Status badge config ──────────────────────────────────────────────────────
 const statusConfig = {
     open: {
@@ -105,11 +69,23 @@ export default function MsmeDashboard() {
     const msme = JSON.parse(localStorage.getItem("msme") || "{}");
 
     useEffect(() => {
-        // Simulate an API fetch — swap with real fetch when ready
-        setTimeout(() => {
-            setBounties(MOCK_BOUNTIES);
-            setLoading(false);
-        }, 800);
+        const token = localStorage.getItem("msme_accessToken");
+        fetch("http://localhost:5000/api/bounties/my", {
+            headers: { Authorization: `Bearer ${token}` },
+            credentials: "include",
+        })
+            .then((r) => r.json())
+            .then((data) => {
+                // Normalize _id → id and skill → skills array
+                const list = (data.bounties || []).map((b) => ({
+                    ...b,
+                    id: b._id,
+                    skills: b.skill ? [b.skill] : [],
+                }));
+                setBounties(list);
+            })
+            .catch(() => {})
+            .finally(() => setLoading(false));
     }, []);
 
     const filtered = bounties.filter((b) => {
@@ -158,11 +134,11 @@ export default function MsmeDashboard() {
                     </p>
                 </div>
                 <Link
-                    to="/msme/post-task"
+                    to="/msme/post-bounty"
                     className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all shadow-lg shadow-purple-900/30 w-fit"
                 >
                     <Plus className="h-4 w-4" />
-                    Post a Task
+                    Post a bounty
                 </Link>
             </div>
 
@@ -197,11 +173,10 @@ export default function MsmeDashboard() {
                             <button
                                 key={f}
                                 onClick={() => setActiveFilter(f)}
-                                className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all capitalize ${
-                                    activeFilter === f
-                                        ? "bg-purple-600/20 text-purple-300 border border-purple-500/25"
-                                        : "text-white/30 hover:text-white hover:bg-white/5 border border-transparent"
-                                }`}
+                                className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-all capitalize ${activeFilter === f
+                                    ? "bg-purple-600/20 text-purple-300 border border-purple-500/25"
+                                    : "text-white/30 hover:text-white hover:bg-white/5 border border-transparent"
+                                    }`}
                             >
                                 {f === "in_review" ? "In Review" : f.charAt(0).toUpperCase() + f.slice(1)}
                             </button>
@@ -232,11 +207,11 @@ export default function MsmeDashboard() {
                             action={
                                 bounties.length === 0 ? (
                                     <Link
-                                        to="/msme/post-task"
+                                        to="/msme/post-bounty"
                                         className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold px-5 py-2.5 rounded-full"
                                     >
                                         <Plus className="h-4 w-4" />
-                                        Post a Task
+                                        Post a Bounty
                                     </Link>
                                 ) : null
                             }

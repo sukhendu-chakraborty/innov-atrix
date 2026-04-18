@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -325,10 +325,33 @@ export default function BountyMarketplace() {
     const [category, setCategory] = useState("all");
     const [deadline, setDeadline] = useState("any");
     const [maxBudget, setMaxBudget] = useState(100000);
+    const [liveBounties, setLiveBounties] = useState([]);
+
+    useEffect(() => {
+        fetch("http://localhost:5000/api/bounties")
+            .then((r) => r.json())
+            .then((data) => {
+                const list = (data.bounties || []).map((b) => ({
+                    id: b._id,
+                    title: b.title,
+                    description: b.description,
+                    company_name: b.msmeBusinessName || "MSME",
+                    company_verified: b.msmeVerified || false,
+                    skills_required: b.skill ? [b.skill] : [],
+                    budget: b.budget,
+                    deadline: b.deadline ? b.deadline.slice(0, 10) : null,
+                    category: "all",
+                }));
+                setLiveBounties(list);
+            })
+            .catch(() => {});
+    }, []);
+
+    const allBounties = liveBounties.length > 0 ? liveBounties : DUMMY_BOUNTIES;
 
     const filtered = useMemo(() => {
-        return DUMMY_BOUNTIES.filter((b) => {
-            const haystack = `${b.title} ${b.description} ${b.skills_required.join(" ")} ${b.company_name}`.toLowerCase();
+        return allBounties.filter((b) => {
+            const haystack = `${b.title} ${b.description} ${(b.skills_required || []).join(" ")} ${b.company_name}`.toLowerCase();
             if (search && !haystack.includes(search.toLowerCase())) return false;
             if (category !== "all" && b.category !== category) return false;
             if (Number(b.budget) > maxBudget) return false;
@@ -338,7 +361,7 @@ export default function BountyMarketplace() {
             }
             return true;
         });
-    }, [search, category, deadline, maxBudget]);
+    }, [search, category, deadline, maxBudget, allBounties]);
 
     const clearFilters = () => {
         setSearch("");
