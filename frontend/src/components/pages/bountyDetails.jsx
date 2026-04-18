@@ -1,216 +1,534 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+    ChevronLeft,
+    Home,
+    Repeat2,
+    FolderOpen,
+    User,
+    Building2,
+    BadgeCheck,
+    IndianRupee,
+    Calendar,
+    Clock,
+    Send,
+    Paperclip,
+    CheckCircle2,
+} from "lucide-react";
+import { differenceInDays, format } from "date-fns";
 
-export default function BountyDetail() {
+// ── Same dummy data as Bounty.jsx ──────────────────────────────────────────────
+const DUMMY_BOUNTIES = [
+    {
+        id: "1",
+        title: "Redesign SaaS landing page",
+        description:
+            "We need a fresh, modern landing page redesign for our analytics SaaS. Hero, features, pricing, and testimonials sections. Figma deliverable with desktop + mobile.",
+        company_name: "Nova Studio",
+        company_verified: true,
+        company_bio: "Growing Indian business hiring based on verified skills and real work.",
+        skills_required: ["Figma", "UI/UX", "Web Design"],
+        budget: 12000,
+        deadline: "2025-05-10",
+        posted: "2025-04-17",
+        category: "ui_ux",
+    },
+    {
+        id: "2",
+        title: "Build analytics dashboard in React",
+        description:
+            "Create an internal analytics dashboard using React + Recharts. Connect to provided JSON API endpoints. Deliver source code with documentation.",
+        company_name: "Urjaa Labs",
+        company_verified: true,
+        company_bio: "Clean energy startup building data-driven solutions for the Indian market.",
+        skills_required: ["React", "Recharts", "Tailwind"],
+        budget: 28000,
+        deadline: "2025-05-20",
+        posted: "2025-04-15",
+        category: "web_dev",
+    },
+    {
+        id: "3",
+        title: "Data cleaning pipeline for CRM exports",
+        description:
+            "Build a Python pipeline to normalize messy CSV exports. Deduplicate leads, validate emails, output clean XLSX. Bonus: add a simple Streamlit UI.",
+        company_name: "AgriMantra",
+        company_verified: true,
+        company_bio: "AgriTech company digitizing the Indian agricultural supply chain.",
+        skills_required: ["Python", "Pandas", "Data"],
+        budget: 18500,
+        deadline: "2025-05-05",
+        posted: "2025-04-10",
+        category: "data",
+    },
+    {
+        id: "4",
+        title: "Mobile app UI in Flutter",
+        description:
+            "Implement 12 screens from our Figma prototype in Flutter. Pixel-perfect, with smooth navigation and animations. Deliver APK + source code.",
+        company_name: "Kodo Tech",
+        company_verified: false,
+        company_bio: "Edtech startup building next-gen learning apps for students.",
+        skills_required: ["Flutter", "Dart", "Figma"],
+        budget: 35000,
+        deadline: "2025-06-01",
+        posted: "2025-04-12",
+        category: "mobile",
+    },
+    {
+        id: "5",
+        title: "SEO content articles — 10 pieces",
+        description:
+            "Write 10 long-form SEO articles (1500+ words) targeting keywords in the fintech and personal finance niche. Deliver in Google Docs with metadata.",
+        company_name: "WealthNow",
+        company_verified: true,
+        company_bio: "Personal finance platform helping Indians save smarter.",
+        skills_required: ["Content Writing", "SEO", "Research"],
+        budget: 9000,
+        deadline: "2025-04-28",
+        posted: "2025-04-08",
+        category: "content",
+    },
+    {
+        id: "6",
+        title: "E-commerce product feed automation",
+        description:
+            "Script to sync WooCommerce product catalog to Google Merchant Center and Meta Catalog automatically daily. Deliver working cron + documentation.",
+        company_name: "Bazaar Digital",
+        company_verified: false,
+        company_bio: "D2C brand consultancy scaling Indian e-commerce businesses.",
+        skills_required: ["Python", "APIs", "Automation"],
+        budget: 22000,
+        deadline: "2025-05-15",
+        posted: "2025-04-14",
+        category: "web_dev",
+    },
+    {
+        id: "7",
+        title: "Instagram growth strategy & content calendar",
+        description:
+            "Build a 90-day Instagram growth plan with content calendar, hashtag research, and posting schedule for a D2C brand in the wellness space.",
+        company_name: "Veda Naturals",
+        company_verified: true,
+        company_bio: "Ayurvedic wellness brand going digital.",
+        skills_required: ["Marketing", "Social Media", "Content"],
+        budget: 7500,
+        deadline: "2025-05-08",
+        posted: "2025-04-09",
+        category: "marketing",
+    },
+    {
+        id: "8",
+        title: "Node.js REST API for inventory management",
+        description:
+            "Build a RESTful API with Node.js/Express and MongoDB for tracking warehouse inventory, orders, and suppliers. Include Postman collection.",
+        company_name: "SwiftStock",
+        company_verified: true,
+        company_bio: "B2B logistics startup modernizing warehouse operations.",
+        skills_required: ["Node.js", "MongoDB", "REST API"],
+        budget: 45000,
+        deadline: "2025-06-15",
+        posted: "2025-04-16",
+        category: "web_dev",
+    },
+    {
+        id: "9",
+        title: "Brand identity & logo design",
+        description:
+            "Full brand identity package: logo (3 concepts), colour palette, typography, and brand usage guidelines PDF. Deliver all source files.",
+        company_name: "Sunrise Exports",
+        company_verified: false,
+        company_bio: "Export-import firm entering the domestic retail market.",
+        skills_required: ["Logo Design", "Branding", "Illustrator"],
+        budget: 14000,
+        deadline: "2025-05-25",
+        posted: "2025-04-13",
+        category: "ui_ux",
+    },
+];
+
+// ── Sidebar ────────────────────────────────────────────────────────────────────
+function Sidebar() {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const initial = (user.name || "U")[0].toUpperCase();
+
     return (
-        <div>
-            <meta charSet="utf-8" />
-            <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-            <title>SkillBridge - Bounty Detail</title>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-            <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-            <style dangerouslySetInnerHTML={{ __html: "\n        body { font-family: 'Inter', sans-serif; }\n    " }} />
-            {/* TopNavBar */}
-            <nav className="bg-[#0e0e0e]/80 backdrop-blur-lg w-full h-16 fixed top-0 z-50 shadow-xl border-b border-outline-variant/15 font-['Inter'] tracking-tight flex items-center justify-between px-8 mx-auto">
-                <div className="flex items-center gap-8">
-                    <div className="text-2xl font-black bg-gradient-to-br from-[#ba9eff] to-[#699cff] bg-clip-text text-transparent">SkillBridge</div>
-                    <div className="hidden md:flex items-center gap-6">
-                        <a className="text-neutral-400 hover:text-[#ba9eff] transition-all font-semibold hover:shadow-[0_0_20px_rgba(186,158,255,0.2)]" href="#">Platform</a>
-                        <a className="text-white font-semibold shadow-[0_0_20px_rgba(186,158,255,0.2)]" href="#">Ecosystem</a>
-                        <a className="text-neutral-400 hover:text-[#ba9eff] transition-all font-semibold hover:shadow-[0_0_20px_rgba(186,158,255,0.2)]" href="#">Docs</a>
-                    </div>
+        <nav className="hidden md:flex flex-col fixed left-0 top-0 h-full w-64 border-r border-white/5 bg-neutral-900/40 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.4)] z-40">
+            <div className="p-8">
+                <div className="text-2xl font-extrabold tracking-tighter bg-gradient-to-r from-[#ba9eff] to-[#699cff] bg-clip-text text-transparent">
+                    Step-A-Ahead
                 </div>
-                <div className="flex items-center gap-6">
-                    <div className="relative hidden sm:block">
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">search</span>
-                        <input className="bg-surface-container-lowest border border-outline-variant/15 rounded-full py-1.5 pl-9 pr-4 text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary-dim transition-all w-64" placeholder="Search bounties..." type="text" />
-                    </div>
-                    <button className="bg-gradient-to-r from-[#ba9eff] to-[#699cff] text-on-primary-fixed font-semibold px-4 py-1.5 rounded-full text-sm hover:shadow-[0_0_20px_rgba(186,158,255,0.4)] transition-all">Get Started</button>
-                    <img alt="User Profile" className="w-8 h-8 rounded-full border border-outline-variant/30 object-cover" data-alt="close-up portrait of a young professional man with a neutral expression, warm studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUTq9j5QpWL8nnoJRpKc6kJfCZ2lezsl4bNG7XzId3iLGUW0SyDr61d4FwkV3syfN_iiaGhiAdDAEForA4YISCRcI9J_w7jb3N2HV2wacKPa2FZbLgezPR9RTYe1LdYEerUczjGxe5igAjixUoIjgH1PoTz5SvIKM8mZWDigENSXCIB71zRwwhmZwulswZvfpb60D2ehpNY3KbQkwjCOvQOClHR9xyBymJabMDhJ0IzrT5S_GGIa7-smZ87Ss5dfcvFe67pWSq8wQ" />
+                <div className="text-xs text-white/30 tracking-wider uppercase mt-1 font-semibold">
+                    Future of Work
                 </div>
-            </nav>
-            {/* SideNavBar */}
-            <aside className="flex flex-col fixed left-0 top-0 h-full w-64 border-r border-white/5 bg-neutral-900/40 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_15px_rgba(186,158,255,0.05)] pt-20 pb-6 px-4 z-40 hidden lg:flex flex-col font-['Inter'] antialiased">
-                <div className="flex-1 space-y-2 mt-8">
-                    <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-400 hover:text-white transition-colors hover:bg-white/10 duration-300 scale-95 hover:scale-100 ease-out group">
-                        <span className="material-symbols-outlined group-hover:text-primary transition-colors">home</span>
-                        <span className="font-medium text-sm">Home</span>
-                    </Link>
-                    <Link to="/bounties" className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#ba9eff] border-r-2 border-[#ba9eff] font-bold bg-white/5 scale-95 duration-200 ease-out">
-                        <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: '"FILL" 1' }}>rebase_edit</span>
-                        <span className="font-medium text-sm">Bounties</span>
-                    </Link>
-                    <Link to="/bounties" className="flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-400 hover:text-white transition-colors hover:bg-white/10 duration-300 scale-95 hover:scale-100 ease-out group">
-                        <span className="material-symbols-outlined group-hover:text-primary transition-colors">folder_open</span>
-                        <span className="font-medium text-sm">Projects</span>
-                    </Link>
-                    <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg text-neutral-400 hover:text-white transition-colors hover:bg-white/10 duration-300 scale-95 hover:scale-100 ease-out group">
-                        <span className="material-symbols-outlined group-hover:text-primary transition-colors">person</span>
-                        <span className="font-medium text-sm">Profile</span>
-                    </Link>
-                </div>
-            </aside>
-            {/* Main Content */}
-            <main className="pt-24 pb-12 px-6 lg:pl-72 max-w-screen-2xl mx-auto min-h-screen">
-                {/* Back Link */}
-                <Link to="/bounties" className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors mb-6 text-sm">
-                    <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                    Back to Bounties
+            </div>
+            <div className="flex-1 px-4 space-y-2 mt-4">
+                <Link to="/" className="flex items-center gap-4 px-4 py-3 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-all group">
+                    <Home className="h-4 w-4" />
+                    <span className="font-medium text-sm">Home</span>
                 </Link>
-                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                        {/* Left Column: Details */}
-                        <div className="xl:col-span-2 space-y-8">
-                            {/* Hero Header */}
-                            <div className="bg-surface-container-low rounded-xl p-8 relative overflow-hidden border border-outline-variant/15">
-                                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none" />
-                                <div className="relative z-10 flex flex-col items-start gap-4">
-                                    <div className="flex items-center gap-3">
-                                        <span className="bg-tertiary-container/20 text-tertiary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider inline-flex items-center gap-1.5 border border-tertiary-container/30 shadow-[0_0_10px_rgba(255,151,181,0.15)]">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse" />
-                                            Open Bounty
+                <Link to="/bounties" className="flex items-center gap-4 px-4 py-3 rounded-xl text-[#ba9eff] border-r-2 border-[#ba9eff] font-bold bg-white/5 transition-all">
+                    <Repeat2 className="h-4 w-4" />
+                    <span className="font-medium text-sm">Bounties</span>
+                </Link>
+                <Link to="/bounties" className="flex items-center gap-4 px-4 py-3 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-all group">
+                    <FolderOpen className="h-4 w-4" />
+                    <span className="font-medium text-sm">Projects</span>
+                </Link>
+                <Link to="/dashboard" className="flex items-center gap-4 px-4 py-3 rounded-xl text-neutral-400 hover:text-white hover:bg-white/10 transition-all group">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium text-sm">Profile</span>
+                </Link>
+            </div>
+
+            {/* Nudge card */}
+            <div className="mx-4 mb-4 p-4 rounded-xl bg-gradient-to-br from-purple-600/20 to-pink-600/10 border border-purple-500/20">
+                <p className="text-xs font-bold text-white mb-1">Level up faster</p>
+                <p className="text-[11px] text-white/40 leading-relaxed">
+                    Complete a bounty this week to boost your profile score.
+                </p>
+            </div>
+
+            <div className="p-6 border-t border-white/5">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        {initial}
+                    </div>
+                    <div className="min-w-0">
+                        <div className="text-sm font-semibold text-white truncate">{user.name || "Guest"}</div>
+                        <div className="text-xs text-white/30 truncate">{user.email || ""}</div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+}
+
+// ── Main Page ──────────────────────────────────────────────────────────────────
+export default function BountyDetail() {
+    const { id } = useParams();
+    const [activeTab, setActiveTab] = useState("submit");
+    const [workLink, setWorkLink] = useState("");
+    const [notes, setNotes] = useState("");
+    const [submitted, setSubmitted] = useState(false);
+
+    const bounty = DUMMY_BOUNTIES.find((b) => b.id === id) || DUMMY_BOUNTIES[0];
+    const deadline = bounty.deadline ? new Date(bounty.deadline) : null;
+    const posted = bounty.posted ? new Date(bounty.posted) : null;
+    const daysLeft = deadline ? differenceInDays(deadline, new Date()) : null;
+    const companyInitial = bounty.company_name[0].toUpperCase();
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (workLink.trim()) setSubmitted(true);
+    };
+
+    const tabs = [
+        { id: "submit", label: "Submit" },
+        { id: "submissions", label: "Submissions (0)" },
+        { id: "discussion", label: "Discussion" },
+    ];
+
+    return (
+        <div className="min-h-screen bg-[#0e0e0e] text-white font-sans">
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+            <Sidebar />
+
+            <main className="md:pl-64 min-h-screen">
+                <div className="max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8 py-10">
+
+                    {/* Back link */}
+                    <Link
+                        to="/bounties"
+                        className="inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors mb-8 group"
+                    >
+                        <ChevronLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+                        Back to marketplace
+                    </Link>
+
+                    {/* Two-column grid */}
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+                        {/* ── Left column ── */}
+                        <div className="xl:col-span-2 space-y-5">
+
+                            {/* Hero header card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35 }}
+                                className="rounded-2xl bg-white/[0.03] border border-white/8 p-6 sm:p-8"
+                            >
+                                {/* Company row */}
+                                <div className="flex items-center gap-2 text-sm text-white/40 mb-3">
+                                    <Building2 className="w-4 h-4" />
+                                    <span>{bounty.company_name}</span>
+                                    {bounty.company_verified && (
+                                        <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+                                            <BadgeCheck className="w-4 h-4" />
+                                            Verified
                                         </span>
-                                        <span className="text-on-surface-variant text-sm flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[16px]">schedule</span>
-                                            Ends in 4 days
+                                    )}
+                                </div>
+
+                                {/* Title */}
+                                <h1 className="text-2xl sm:text-3xl font-bold text-white leading-snug mb-4">
+                                    {bounty.title}
+                                </h1>
+
+                                {/* Meta row */}
+                                <div className="flex flex-wrap gap-5 text-sm text-white/50">
+                                    <span className="flex items-center gap-1.5">
+                                        <IndianRupee className="w-3.5 h-3.5 text-white" />
+                                        <span className="text-white font-semibold">
+                                            {Number(bounty.budget).toLocaleString("en-IN")}
                                         </span>
-                                    </div>
-                                    <h1 className="text-4xl md:text-5xl font-extrabold text-on-surface tracking-tight leading-tight">
-                                        Smart Contract Audit: Defi Yield Aggregator V2
-                                    </h1>
-                                    <div className="flex flex-wrap items-center gap-6 mt-2 text-on-surface-variant">
-                                        <div className="flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-primary">payments</span>
-                                            <span className="font-semibold text-primary-container text-lg">5,000 USDC</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <span className="material-symbols-outlined text-[18px]">group</span>
-                                            12 Applicants
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <span className="material-symbols-outlined text-[18px]">military_tech</span>
-                                            Advanced Difficulty
-                                        </div>
-                                    </div>
+                                    </span>
+                                    {deadline && (
+                                        <span className="flex items-center gap-1.5">
+                                            <Calendar className="w-3.5 h-3.5" />
+                                            Due {format(deadline, "MMM d, yyyy")}
+                                        </span>
+                                    )}
+                                    {posted && (
+                                        <span className="flex items-center gap-1.5">
+                                            <Clock className="w-3.5 h-3.5" />
+                                            Posted {format(posted, "MMM d")}
+                                        </span>
+                                    )}
                                 </div>
-                            </div>
-                            {/* Tabs & Content Area */}
-                            <div className="bg-surface-container-low rounded-xl border border-outline-variant/15 overflow-hidden">
-                                {/* Tab Navigation */}
-                                <div className="flex border-b border-outline-variant/15 bg-surface-container-lowest/50 px-6 pt-4 gap-8">
-                                    <button className="pb-3 border-b-2 border-primary text-primary font-semibold text-sm tracking-wide">
-                                        Description
-                                    </button>
-                                    <button className="pb-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium tracking-wide">
-                                        Submissions (3)
-                                    </button>
-                                    <button className="pb-3 border-b-2 border-transparent text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium tracking-wide flex items-center gap-2">
-                                        Discussion
-                                        <span className="bg-primary/20 text-primary text-[10px] px-1.5 py-0.5 rounded-full">New</span>
-                                    </button>
+                            </motion.div>
+
+                            {/* Description card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, delay: 0.07 }}
+                                className="rounded-2xl bg-white/[0.03] border border-white/8 p-6 sm:p-8"
+                            >
+                                <h2 className="text-base font-semibold text-white mb-3">Description</h2>
+                                <p className="text-sm text-white/50 leading-relaxed mb-6">
+                                    {bounty.description}
+                                </p>
+
+                                <h2 className="text-base font-semibold text-white mb-3">Required skills</h2>
+                                <div className="flex flex-wrap gap-2">
+                                    {bounty.skills_required.map((s) => (
+                                        <span
+                                            key={s}
+                                            className="text-xs px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/60 font-medium"
+                                        >
+                                            {s}
+                                        </span>
+                                    ))}
                                 </div>
-                                {/* Tab Content: Description */}
-                                <div className="p-8 space-y-8">
-                                    <div className="space-y-4">
-                                        <h3 className="text-xl font-bold tracking-tight text-on-surface">Overview</h3>
-                                        <p className="text-on-surface-variant text-base leading-relaxed">
-                                            We are preparing to launch V2 of our decentralized yield aggregator. Before mainnet deployment, we require a comprehensive security audit of our core smart contracts. The protocol handles automated yield farming strategies across multiple AMMs and lending protocols on Ethereum and Arbitrum.
-                                        </p>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <h3 className="text-xl font-bold tracking-tight text-on-surface">Requirements</h3>
-                                        <ul className="space-y-3 text-on-surface-variant text-base">
-                                            <li className="flex items-start gap-3">
-                                                <span className="material-symbols-outlined text-secondary text-[20px] mt-0.5">check_circle</span>
-                                                Identify reentrancy vulnerabilities in the strategy routing logic.
-                                            </li>
-                                            <li className="flex items-start gap-3">
-                                                <span className="material-symbols-outlined text-secondary text-[20px] mt-0.5">check_circle</span>
-                                                Verify flash loan attack resistance across all pricing oracles.
-                                            </li>
-                                            <li className="flex items-start gap-3">
-                                                <span className="material-symbols-outlined text-secondary text-[20px] mt-0.5">check_circle</span>
-                                                Ensure correct gas optimization without compromising security.
-                                            </li>
-                                            <li className="flex items-start gap-3">
-                                                <span className="material-symbols-outlined text-secondary text-[20px] mt-0.5">check_circle</span>
-                                                Provide a detailed written report with reproducible exploit scenarios.
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <h3 className="text-xl font-bold tracking-tight text-on-surface">Required Skills</h3>
-                                        <div className="flex flex-wrap gap-2">
-                                            <span className="px-3 py-1 bg-surface-container text-on-surface text-sm rounded border border-outline-variant/20 hover:border-primary/50 transition-colors cursor-default">Solidity</span>
-                                            <span className="px-3 py-1 bg-surface-container text-on-surface text-sm rounded border border-outline-variant/20 hover:border-primary/50 transition-colors cursor-default">Security Audit</span>
-                                            <span className="px-3 py-1 bg-surface-container text-on-surface text-sm rounded border border-outline-variant/20 hover:border-primary/50 transition-colors cursor-default">DeFi</span>
-                                            <span className="px-3 py-1 bg-surface-container text-on-surface text-sm rounded border border-outline-variant/20 hover:border-primary/50 transition-colors cursor-default">Foundry</span>
-                                            <span className="px-3 py-1 bg-surface-container text-on-surface text-sm rounded border border-outline-variant/20 hover:border-primary/50 transition-colors cursor-default">Vyper</span>
+                            </motion.div>
+
+                            {/* Tab card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, delay: 0.14 }}
+                                className="rounded-2xl bg-white/[0.03] border border-white/8 overflow-hidden"
+                            >
+                                {/* Tab nav */}
+                                <div className="flex border-b border-white/8 px-6 pt-4 gap-1">
+                                    {tabs.map((tab) => (
+                                        <button
+                                            key={tab.id}
+                                            onClick={() => setActiveTab(tab.id)}
+                                            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-all ${
+                                                activeTab === tab.id
+                                                    ? "text-white bg-white/5 border border-white/10 border-b-0 -mb-px pb-[9px]"
+                                                    : "text-white/40 hover:text-white/70"
+                                            }`}
+                                        >
+                                            {tab.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Tab content */}
+                                <div className="p-6">
+                                    {activeTab === "submit" && (
+                                        <>
+                                            {submitted ? (
+                                                <div className="flex flex-col items-center justify-center py-10 text-center">
+                                                    <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mb-4">
+                                                        <CheckCircle2 className="w-7 h-7 text-emerald-400" />
+                                                    </div>
+                                                    <h3 className="text-base font-semibold text-white mb-1">Work submitted!</h3>
+                                                    <p className="text-sm text-white/40">The employer will review your submission.</p>
+                                                    <button
+                                                        className="mt-4 text-sm text-white/40 hover:text-white transition-colors underline underline-offset-2"
+                                                        onClick={() => { setSubmitted(false); setWorkLink(""); setNotes(""); }}
+                                                    >
+                                                        Submit another
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <form onSubmit={handleSubmit} className="space-y-5">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-white mb-2">
+                                                            Link to your work
+                                                        </label>
+                                                        <div className="relative">
+                                                            <Paperclip className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/25" />
+                                                            <input
+                                                                type="url"
+                                                                value={workLink}
+                                                                onChange={(e) => setWorkLink(e.target.value)}
+                                                                placeholder="https://github.com/... or Figma link"
+                                                                className="w-full h-11 pl-9 pr-4 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/25 focus:outline-none focus:border-purple-500/40 transition-all"
+                                                                required
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-white mb-2">
+                                                            Notes <span className="text-white/30 font-normal">(optional)</span>
+                                                        </label>
+                                                        <textarea
+                                                            value={notes}
+                                                            onChange={(e) => setNotes(e.target.value)}
+                                                            placeholder="What did you build? Any assumptions?"
+                                                            rows={4}
+                                                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-white/25 focus:outline-none focus:border-purple-500/40 transition-all resize-none"
+                                                        />
+                                                    </div>
+
+                                                    <button
+                                                        type="submit"
+                                                        className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold rounded-full hover:opacity-90 transition-opacity"
+                                                    >
+                                                        <Send className="w-4 h-4" />
+                                                        Submit work
+                                                    </button>
+                                                </form>
+                                            )}
+                                        </>
+                                    )}
+
+                                    {activeTab === "submissions" && (
+                                        <div className="flex flex-col items-center justify-center py-14 text-center">
+                                            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+                                                <Send className="w-5 h-5 text-white/20" />
+                                            </div>
+                                            <p className="text-sm font-semibold text-white">No submissions yet</p>
+                                            <p className="text-xs text-white/35 mt-1">Be the first to submit your work.</p>
                                         </div>
-                                    </div>
+                                    )}
+
+                                    {activeTab === "discussion" && (
+                                        <div className="flex flex-col items-center justify-center py-14 text-center">
+                                            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+                                                <span className="text-white/20 text-xl">💬</span>
+                                            </div>
+                                            <p className="text-sm font-semibold text-white">No discussion yet</p>
+                                            <p className="text-xs text-white/35 mt-1">Ask the employer a question.</p>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
+                            </motion.div>
                         </div>
-                        {/* Right Column: Action & Employer */}
-                        <div className="space-y-6">
-                            {/* Action Card */}
-                            <div className="bg-surface-container-high rounded-xl p-6 border border-outline-variant/15 shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_15px_rgba(186,158,255,0.05)] relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-                                <div className="space-y-6 relative z-10">
+
+                        {/* ── Right column ── */}
+                        <div className="space-y-5">
+
+                            {/* Employer card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, delay: 0.1 }}
+                                className="rounded-2xl bg-white/[0.03] border border-white/8 p-6"
+                            >
+                                <p className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">
+                                    Employer
+                                </p>
+                                <div className="flex items-center gap-3 mb-3">
+                                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center text-white font-bold text-base flex-shrink-0">
+                                        {companyInitial}
+                                    </div>
                                     <div>
-                                        <div className="text-sm text-on-surface-variant mb-1 uppercase tracking-wider font-semibold">Reward</div>
-                                        <div className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">5,000 USDC</div>
-                                        <div className="text-xs text-on-surface-variant mt-1 flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[14px]">info</span>
-                                            Escrowed in smart contract
+                                        <div className="text-sm font-semibold text-white">{bounty.company_name}</div>
+                                        {bounty.company_verified && (
+                                            <div className="flex items-center gap-1 text-emerald-400 text-xs font-medium mt-0.5">
+                                                <BadgeCheck className="w-3 h-3" />
+                                                Verified
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <p className="text-xs text-white/40 leading-relaxed">
+                                    {bounty.company_bio}
+                                </p>
+                            </motion.div>
+
+                            {/* Budget / CTA card */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.35, delay: 0.18 }}
+                                className="rounded-2xl bg-gradient-to-br from-purple-600 to-purple-800 p-6 relative overflow-hidden"
+                            >
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+                                <div className="relative z-10">
+                                    <p className="text-sm font-semibold text-white mb-0.5">Ready to ship?</p>
+                                    <p className="text-xs text-white/60 mb-4">Submit your work before the deadline to qualify.</p>
+                                    <div className="flex items-baseline gap-1 mb-1">
+                                        <IndianRupee className="w-5 h-5 text-white" />
+                                        <span className="text-3xl font-black text-white">
+                                            {Number(bounty.budget).toLocaleString("en-IN")}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-white/50">Budget · paid on acceptance</p>
+                                </div>
+                            </motion.div>
+
+                            {/* Deadline info */}
+                            {deadline && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 16 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.35, delay: 0.24 }}
+                                    className="rounded-2xl bg-white/[0.03] border border-white/8 p-5"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2 text-sm text-white/50">
+                                            <Calendar className="w-4 h-4" />
+                                            Deadline
                                         </div>
+                                        <span className={`text-sm font-semibold ${daysLeft !== null && daysLeft < 7 ? "text-rose-400" : "text-white"}`}>
+                                            {daysLeft !== null && daysLeft >= 0
+                                                ? `${daysLeft}d left`
+                                                : "Expired"} · {format(deadline, "MMM d, yyyy")}
+                                        </span>
                                     </div>
-                                    <button className="w-full bg-gradient-to-r from-primary to-secondary text-on-primary-fixed font-bold py-3.5 px-6 rounded-lg hover:shadow-[0_0_20px_rgba(186,158,255,0.3)] transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2 group">
-                                        Apply Now
-                                        <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                                    </button>
-                                    <div className="flex items-center justify-center gap-4 text-sm text-on-surface-variant pt-2 border-t border-outline-variant/15">
-                                        <button className="hover:text-primary transition-colors flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[16px]">bookmark_border</span> Save
-                                        </button>
-                                        <button className="hover:text-primary transition-colors flex items-center gap-1">
-                                            <span className="material-symbols-outlined text-[16px]">share</span> Share
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            {/* Employer Card */}
-                            <div className="bg-surface-container-low rounded-xl p-6 border border-outline-variant/15">
-                                <div className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-4">Posted By</div>
-                                <div className="flex items-start gap-4 mb-6">
-                                    <div className="w-12 h-12 rounded-lg bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center overflow-hidden shrink-0">
-                                        <img alt="Company Logo" className="w-full h-full object-cover opacity-80" data-alt="abstract geometric modern tech company logo on dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGqyVeTIy6rDDRPWjINdsmfpf_4ldZUrvESp5BV-2Uf23LSLeY_EOwcPK2iHIdPD1hkPmA4YlGNBLmpfgEJ789-B1Y3Xq4gBqaIpPCejMELLcgZA3-Kh5jlwu7VcE9olJFSt-cR5mAlYlF9KlLc2umYfvrGvxHdiG9Iaf15DcFXHMfJJRHm_WTAbuiSzmtJdaaAlEM8Sl5VmiT1gAkZUEHIECB_-4pJOkTpMYKnlZltibdgN-646_oXchXx9D9h4xKqOPMI9EzyPQ" />
-                                    </div>
-                                    <div>
-                                        <h4 className="text-lg font-bold text-on-surface flex items-center gap-2">
-                                            Nexus Finance
-                                            <span className="material-symbols-outlined text-secondary text-[16px]" title="Verified Protocol">verified</span>
-                                        </h4>
-                                        <p className="text-sm text-on-surface-variant mt-0.5">DeFi Infrastructure</p>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 mb-6">
-                                    <div className="bg-surface-container rounded-lg p-3 border border-outline-variant/10">
-                                        <div className="text-xs text-on-surface-variant mb-1">Bounties Paid</div>
-                                        <div className="text-lg font-bold text-on-surface">24</div>
-                                    </div>
-                                    <div className="bg-surface-container rounded-lg p-3 border border-outline-variant/10">
-                                        <div className="text-xs text-on-surface-variant mb-1">Total Volume</div>
-                                        <div className="text-lg font-bold text-on-surface">$142k</div>
-                                    </div>
-                                </div>
-                                <a className="text-sm text-primary hover:text-secondary transition-colors font-medium flex items-center justify-center gap-1" href="#">
-                                    View Employer Profile
-                                    <span className="material-symbols-outlined text-[16px]">open_in_new</span>
-                                </a>
-                            </div>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
+                </div>
             </main>
+
+            {/* Mobile bottom nav */}
+            <nav className="md:hidden fixed bottom-0 w-full h-16 bg-[#0e0e0e]/90 backdrop-blur-xl border-t border-white/5 flex justify-around items-center z-50 px-2">
+                <Link to="/" className="flex flex-col items-center w-16 text-white/40 hover:text-white transition-colors">
+                    <Home className="h-5 w-5 mb-1" />
+                    <span className="text-[10px]">Home</span>
+                </Link>
+                <Link to="/bounties" className="flex flex-col items-center w-16 text-purple-400">
+                    <Repeat2 className="h-5 w-5 mb-1" />
+                    <span className="text-[10px] font-bold">Bounties</span>
+                </Link>
+                <Link to="/dashboard" className="flex flex-col items-center w-16 text-white/40 hover:text-white transition-colors">
+                    <User className="h-5 w-5 mb-1" />
+                    <span className="text-[10px]">Profile</span>
+                </Link>
+            </nav>
         </div>
     );
 }
